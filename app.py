@@ -1,23 +1,68 @@
 import tkinter as tk
+import card
 from tkinter import ttk
+from random import randint
+from datetime import datetime
+import sqlite3
 
-chars = "char"
-english = "english"
-pinyin = "pinyin"
-example = "example"
 # s = ttk.Style()
+max_cards = 100
+
+today = datetime.today()
+conn = sqlite3.connect('vocab.db')
+
+cursor = conn.execute('''SELECT id, chars, pinyin, english, example_ch,
+example_eng, last, ease, next, learning
+ from vocabulary
+where next <=(?)
+limit (?)''', (today.strftime("%Y=%m-%d"), str(max_cards)))
+
+cursor.fetchone()
+
+cards = []
+class card:
+    def __init__(self, row):
+        self.id =  row[0]
+        self.chars = row[1]
+        self.pinyin = row[2]
+        self.english = row[3]
+        self.example_ch = row[4]
+        self.example_eng = row[5]
+        self.last = row[6]
+        self.next = row[8]
+        self.ease = row[7]
+        self.learning = row[9]
+        self.baseline = row[8] - row[6]
+
+
+for row in cursor:
+    cards.append(card(row))
+
+# keep old cards around to 
+# be able to control Z 
+completed_cards = []
+def wrong(cards):
+    w=cards.pop() 
+    w.baseline = 0
+    cards.insert((len(cards)//2), w)
+
+# ease matching: 0 = hard, 0.5 = medium, 1 = hard
+def right(cards, ease): 
+    w= cards.pop()
+    w.baseline = w.baseline + w.baseline * ease
+    completed_cards.append(w)
 
 class Root(tk.Tk):
     def __init__(self, *args, **kwargs):
         tk.Tk.__init__(self, *args, **kwargs)
         self.title("Flashcard app")
         container = tk.Frame(self)
-        container.pack(side = "top", fill = "both", expand = "True")
-        container.grid_rowconfigure(0, weight = 1)
-        container.grid_columnconfigure(0, weight = 1)
+        container.pack(side="top", fill="both", expand="True")
+        container.grid_rowconfigure(0, weight=1)
+        container.grid_columnconfigure(0, weight=1)
         self.frames = {}
         for F in (StartPage, Front, Back):
-            frame = F(container,self)
+            frame = F(container, self)
             self.frames[F] = frame
             frame.grid(row=0, column=0, sticky="nsew")
         self.show_frame(StartPage)
@@ -26,97 +71,48 @@ class Root(tk.Tk):
         frame = self.frames[controller]
         frame.tkraise()
 
-class StartPage(tk.Frame):
+
+class StartPage(ttk.Frame):
     def __init__(self, parent, controller):
         #
         tk.Frame.__init__(self, parent)
-        label = tk.Label(self, text="Start Page", font = ("Verdana", 12))
-        label.pack(pady=10, padx=10)
-        button1 = tk.Button(self, text= "Start Studying",
-            command = lambda: controller.show_frame(Front))
+        label = ttk.Label(self, text="Start Page", font=("Verdana", 12))
+        # label.pack(pady=10, padx=10)
+        button1 = ttk.Button(self, text="Start Studying",
+                             command=lambda: controller.show_frame(Front))
         button1.pack()
 
-class Front(tk.Frame):
+
+class Front(ttk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
-        Quiz = tk.Label(self, text = chars)
+        Quiz = ttk.Label(self, text=cards[0].chars)
         Quiz.grid(column=1, row=0)
-        flip_but = ttk.Button(self, text = "flip card",
-            command= lambda: controller.show_frame(Back))
+        flip_but = ttk.Button(self, text="flip card",
+                              command=lambda: controller.show_frame(Back))
         flip_but.grid(column=1, row=1)
 
-class Back(tk.Frame):
+
+class Back(ttk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
-        eng = tk.Label(self, text = english)
+        eng = ttk.Label(self, text=cards[0].english)
         eng.grid(column=1, row=0)
-        pin = tk.Label(self, text =pinyin)
+        pin = ttk.Label(self, text=cards[0].pinyin)
         pin.grid(column=1, row=1)
-        ex = tk.Label(self, text = example)
-        ex.grid(column=0, columnspan = 3, row=2)
-        flip_but = tk.Button(self, text = "flip card",
-            command= lambda: controller.show_frame(Front))
+        ex = ttk.Label(self, text=cards[0].example)
+        ex.grid(column=0, columnspan=3, row=2)
+        flip_but = ttk.Button(self, text="flip card",
+                              command=lambda: controller.show_frame(Front))
         flip_but.grid(column=1, row=1)
-# class card:
-#     def __init__(self, chars, english, pinyin, example):
-#         self.chars= chars
-#         self.english = english
-#         self.pinyin = pinyin
-#         self.example = example
+        flip_but = ttk.Button(self, text="flip card",
+                              command=lambda: controller.show_frame(Front))
+        again = ttk.Button(self, text="Again",
+                              command=lambda: controller.show_frame(Front))
+        easy = ttk.Button(self, text="Easy",
+                              command=lambda: controller.show_frame(Front))
 
-# c1=card(chars, english, pinyin, example)
 
 main = Root()
 main.mainloop()
-
-# menu stuff to be commented in later
-
-# def quit(root=root):
-#     root.destroy()
-#
-#
-# menu = tk.Menu(root)
-# root.config(menu=menu)
-# file_menu = tk.Menu(menu)
-# menu.add_cascade(label = "File", menu=file_menu)
-# file_menu.add_command(label="Exit", command=quit)
-
-
-
-
-# class Flashcard:
-#     def __init__(self, root, card):
-#         self.card=card
-#
-#     def render_front(self):
-#         Quiz = ttk.Label(self.mainframe, text = self.card.chars)
-#         Quiz.grid(column=1, row=0)
-#         flip_but = ttk.Button(self.bottomframe, text = "flip card") #, command=flipcard)
-#         flip_but.grid(column=1, row=1)
-#
-#     def render_back(self):
-#         english = ttk.Label(self.mainframe, text = self.card.english)
-#         english.grid(column=1, row=0)
-#         pin = ttk.Label(self.mainframe, text = self.card.pinyin)
-#         pin.grid(column=1, row=1)
-#         ex = ttk.Label(mainframe, text = self.card.example)
-#         ex.grid(column=0, columnspan = 3, row=2)
-#
-#
-#
-#
-# root = tk.Tk()
-# root.columnconfigure(0, weight =1)
-# root.rowconfigure(0,weight=1)
-# root.title("Flashcard app")
-# grey = '#D3D3D3'
-# s.configure("Frame1.TFrame", background = grey)
-# mainframe = ttk.Frame(root, padding="3 3 12 12")
-# mainframe.grid(column=0, row=1)
-# bottomframe = ttk.Frame(root, style="Frame1.TFrame")
-# bottomframe['padding']= (3,3,12,12)
-# bottomframe.grid(row = 100, column = 0, columnspan = 100, sticky = 'sew')
-# bottomframe.columnconfigure(0, weight = 5)
-# f=Flashcard(root, c1)
-# f.render_front()
-# root.mainloop()
+conn.close()
