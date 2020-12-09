@@ -3,6 +3,24 @@ import json
 import os
 import re 
 
+# index of opening parenthesis corresponding to a trailing parenthesis
+def paren_match(myStr): 
+    stack = []
+    for ind, letter in enumerate(myStr[:-1]): 
+        if letter == "(":
+            stack.append(ind)
+        elif letter == ")":
+            if len(stack) > 0: 
+                stack.pop()
+    if stack and len(stack) ==1: 
+        return stack[0]
+    else:
+        return None
+
+
+
+trailingpara = 0
+
 # fields from my anki deck
 fields = ["chars", "color", "pinyin", "English" ]
 
@@ -11,72 +29,73 @@ path = input("Input the relative path and filename to json: ")
 with open(path, 'r', encoding='utf-8') as outfile: 
     data=json.load(outfile)
 
-for note in data['notes'][:10]: 
+card_list = []
+counter = 0
+for note in data['notes']: 
+    counter +=1
     card = {}
     card["chars"] = note["fields"][0]
     # skip color which is empty
-    card["pinyin"] = note["fields"][2]
+    card["pinyin"] = re.sub("[\<].*?[>]", "", note["fields"][2])
     eng_str = note["fields"][3].strip()
+    eng_str=re.sub("[\<].*?[>]", "", eng_str)
+    # replace Chinese parenthesis with standard English parenthesis
+    eng_str=re.sub("（", "(", eng_str)
+    eng_str=re.sub("）", ")", eng_str)
+
+
     # when leading parenthesis, it is a repeat of pinyin section; remove
     if eng_str[0] == '(': 
         ind = eng_str.find(')')
         if ind > 0: 
-            eng_str = eng_str[ind+1]
-    # when trailing parenthesis, parse to find examples
-    if eng_str[-1] == ")":
-        start = eng_str.rfind('(')
-        if start > 0: 
-            # find all chinese characters and indices
-            chin_iter = re.finditer(r'[\u4e00-\u9fff]+', eng_str[start:])
-            if chin_iter: 
-                ch_inds = [(m.span(), m[0]) for m in chin_iter]
-                last = ch_inds[0][1]
+            eng_str = eng_str[ind+1:]
+    # when trailing parenthesis, parse for example sentences
+    if eng_str[-1] == ")": 
+        open_paren = paren_match(eng_str)
+        if open_paren: 
+            tail_str = eng_str[open_paren:]
+            # find indices of chinese characters
+            ch_iter = re.finditer(r'[\u4e00-\u9fff]+', tail_str)
+            if ch_iter: 
+                ch_inds = [m.span()) for m in ch_iter]
                 i=0
-                while i < len(ch_inds)-1 and i < 3:
-                    card["example_ch"+str(i+1)] = ch_inds[i][1]
-                    card["example_eng"+str(i+1)] = eng_str[start:][last: ch_inds[i+1][0][0]]
-                    print("ch ex", card["example_ch"+str(i+1)])
-                    print("eng ex", card["example_eng"+str(i+1)])
-                    last = eng_str[start:][last: ch_inds[i+1][0][1]]
+                # Add up to three examples to fields
+                while i < min(len(ch_inds)-1, 2):
+                    card["example_ch"+str(i)] = tail_str[ch_inds[i][0]:ch_inds[i][1]]
+                    card["example_eng"+str(i)] = tail_str[ch_inds[i][1]+1: ch_inds[i+1][0]
                     i+=1
-                # card["example_ch"+str(i+1)] = ch_inds[i][1]
-                # card["example_eng"+str(i+1)] = eng_str[start:][last:-1]
-                # print(card["example_ch"+str(i)])
-                # print(card["example_eng"+str(i)])
+                card["example_ch"+str(i)] = ch_inds[i][1]
+                # one past last Chinese Char to account for = sign
+                card["example_eng"+str(i)] = tail_str[ch_inds[i][0][1]: -1]
+                # slice off anything in tail parenthesis
+                eng_str=eng_str[:open_paren-1]
 
+        para = re.finditer(r'[(（]', eng_str)
+        if para:
+            *_, start = para
+            start = start.end()
+            tail_str = eng_str[start:]
+            # find indices of chinese characters
+            ch_iter = re.finditer(r'[\u4e00-\u9fff]+', tail_str)
+            if ch_iter: 
+                ch_inds = [(m.span(), m[0]) for m in ch_iter]
+                i=0
+                # index of last chinese character 
+                last = ch_inds[i][0][1]
+                # Add up to three examples to fields
+                while i < min(len(ch_inds)-1, 3):
+                    card["example_ch"+str(i)] = ch_inds[i][1]
+                    card["example_eng"+str(i)] = tail_str[last+1: ch_inds[i+1][0][0]]
+                    last = ch_inds[i+1][0][1]
+                    i+=1
+                card["example_ch"+str(i)] = ch_inds[i][1]
+                # one past last Chinese Char to account for = sign
+                card["example_eng"+str(i)] = tail_str[last+1: -1]
+                # slice off anything in tail parenthesis
+                eng_str=eng_str[:start-1]
+    card['english'] = eng_str
+    card_list.append(card)
+print(card_list)
 
-            
-
-            # for i in range(max(len(ch_inds),3)): 
-            #     card["example_ch"+str(i)] = ch_inds[i][1]
-            #     card["example_eng"+str(i)] = eng_str[start:][last]
-            # print(ch_inds)
-            # eng_inds = [(ch_inds[i][1], ch_inds[i+1][0]) for i in range(len(ch_inds-1))]
-            # eng_exs_inds.append(ch_inds[i][1+1], -1)
-            # for i in range(max(3,len(ch_inds))):
-            #     card["example_ch"+str(i)] = eng_str[start:][ch_inds[i][0]:ch_inds[i][1]]
-            #     card["example_eng"+str(i)] = eng_str[start:][eng_inds[i][0]:eng_inds[i][1]]
-            #     print(card["example_ch"+str(i)])
-            #     print(card["example_eng"+str(i)])
-
-
-
-            # eng_ex
-            # for ind, ex in enumerate(chin_ex):
-            #     card["example_ch"+str(ind)] = ex
-             
-
-        
-
-    # print(eng_str)
-
-        
-
-# Extract all Chinese characters in utf_line
-# chars = re.findall(r'[\u4e00-\u9fff]+',utf_line)
-
-#relative path: 
-# anki_decks/new/deck.json
-
-
-# print(list(data.keys))
+# Filepath for convenience: 
+# anki_decks\new\deck.json
