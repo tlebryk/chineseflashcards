@@ -8,8 +8,13 @@ class card:
     
 
     def __str__(self): 
+        [accum for accum in self.__dict__.items()]
+
+        accum = ""
         for item in self.__dict__.items():
-            return str(item)
+            accum += str(item) +"\n"
+        return accum
             
 
-c1 = card(**{'id' : 1})
+c1 = card(**{'id' : 1, "chars" : "this"})
+print(c1)

@@ -22,12 +22,12 @@ conn.execute('''CREATE TABLE vocabulary
      chars TEXT,
      pinyin TEXT,
      english TEXT,
+     example_ch0 TEXT,
+     example_eng0 TEXT,
      example_ch1 TEXT,
      example_eng1 TEXT,
      example_ch2 TEXT,
      example_eng2 TEXT,
-     example_ch3 TEXT,
-     example_eng3 TEXT,
      last DATE,
      ease INTEGER,
      next DATE,
@@ -40,8 +40,8 @@ conn.execute('''CREATE TABLE vocabulary
 
 max_cards = 100
 
-# cursor = conn.execute('''SELECT id, chars, pinyin, english, example_ch,
-# example_eng, last, ease, next, learning
+# cursor = conn.execute('''SELECT id, chars, pinyin, english, example_ch0,
+# example_eng0, last, ease, next, learning
 #  from vocabulary
 # where next <=(?)
 # limit (?)''', (today.strftime("%Y=%m-%d"), str(max_cards)))
@@ -55,9 +55,9 @@ cards = [
         "zàijiān",
         # 'english' :
         "Goodbye",
-        # 'example_ch' =
+        # 'example_ch0' =
         "就算再见...",
-        # 'example_eng' =
+        # 'example_eng0' =
         "Even if it's goodbye",
         # 'last':
         None,
@@ -75,9 +75,9 @@ cards = [
         "nǐhǎo",
         # 'english' :
         "Hello",
-        # 'example_ch' =
+        # 'example_ch0' =
         "你好，我是希卓",
-        # 'example_eng' =
+        # 'example_eng0' =
         "Hello I'm Theo",
         # 'last':
         None,
@@ -95,9 +95,9 @@ cards = [
         "yi1",
         # 'english' :
         "1",
-        # 'example_ch' =
+        # 'example_ch0' =
         "有一天",
-        # 'example_eng' =
+        # 'example_engo' =
         "one day",
         # 'last':
         None,
@@ -115,9 +115,9 @@ cards = [
         "er4",
         # 'english' :
         "2",
-        # 'example_ch' =
+        # 'example_ch0' =
         "第二课",
-        # 'example_eng' =
+        # 'example_eng0' =
         "Second lesson",
         # 'last':
         None,
@@ -135,9 +135,9 @@ cards = [
         "san1",
         # 'english' :
         "3",
-        # 'example_ch' =
+        # 'example_ch0' =
         "三月",
-        # 'example_eng' =
+        # 'example_eng0' =
         "March",
         # 'last':
         None,
@@ -151,12 +151,12 @@ cards = [
 ]
 
 conn.executemany(
-    '''INSERT INTO vocabulary (chars, pinyin, english, example_ch, example_eng, last, ease, next, learning) 
+    '''INSERT INTO vocabulary (chars, pinyin, english, example_ch0, example_eng0, last, ease, next, learning) 
     VALUES(?,?,?,?,?,?,?,?,?) ''', cards)
 
 
-cursor = conn.execute('''SELECT id, chars, pinyin, english, example_ch,
-example_eng, last, ease, next, learning
+cursor = conn.execute('''SELECT id, chars, pinyin, english, example_ch0,
+example_eng0, last, ease, next, learning
  from vocabulary
 where next <=(?)
 limit (?)''', (today.strftime("%Y=%m-%d"), str(max_cards)))
@@ -167,8 +167,8 @@ for row in cursor:
         'chars': row[1],
         'pinyin': row[2],
         'english': row[3],
-        'example_ch' : row[4],
-        'example_eng' : row[5],
+        'example_ch0' : row[4],
+        'example_eng0' : row[5],
         'last': row[6],
         'ease': row[7],
         'next': row[8],
