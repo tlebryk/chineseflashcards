@@ -27,8 +27,9 @@ for note in data['notes']:
         cd.update(example_gen.gen_ex(eng_str))
     else: 
         cd['english'] = eng_str
-    print(card.card(**cd))
-    card_list.append(card)
+    card_list.append(card.card(**cd))
+for c in card_list:
+    print(c)
 # for card in card_list:
 #     print(card)
 
