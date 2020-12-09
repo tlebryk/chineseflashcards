@@ -54,45 +54,20 @@ for note in data['notes']:
         open_paren = paren_match(eng_str)
         if open_paren: 
             tail_str = eng_str[open_paren:]
-            # find indices of chinese characters
+            # find indices of chinese characters to add to examples
             ch_iter = re.finditer(r'[\u4e00-\u9fff]+', tail_str)
             if ch_iter: 
-                ch_inds = [m.span()) for m in ch_iter]
+                ch_inds = [m.span() for m in ch_iter]
                 i=0
                 # Add up to three examples to fields
                 while i < min(len(ch_inds)-1, 2):
                     card["example_ch"+str(i)] = tail_str[ch_inds[i][0]:ch_inds[i][1]]
-                    card["example_eng"+str(i)] = tail_str[ch_inds[i][1]+1: ch_inds[i+1][0]
-                    i+=1
-                card["example_ch"+str(i)] = ch_inds[i][1]
-                # one past last Chinese Char to account for = sign
-                card["example_eng"+str(i)] = tail_str[ch_inds[i][0][1]: -1]
+                    card["example_eng"+str(i)] = tail_str[ch_inds[i][1]+1: ch_inds[i+1][0]]
+                    i +=1
+                card["example_ch"+str(i)] = tail_str[ch_inds[i][0]:ch_inds[i][1]]
+                card["example_eng"+str(i)] = tail_str[ch_inds[i][1]+1: -1]
                 # slice off anything in tail parenthesis
                 eng_str=eng_str[:open_paren-1]
-
-        para = re.finditer(r'[(（]', eng_str)
-        if para:
-            *_, start = para
-            start = start.end()
-            tail_str = eng_str[start:]
-            # find indices of chinese characters
-            ch_iter = re.finditer(r'[\u4e00-\u9fff]+', tail_str)
-            if ch_iter: 
-                ch_inds = [(m.span(), m[0]) for m in ch_iter]
-                i=0
-                # index of last chinese character 
-                last = ch_inds[i][0][1]
-                # Add up to three examples to fields
-                while i < min(len(ch_inds)-1, 3):
-                    card["example_ch"+str(i)] = ch_inds[i][1]
-                    card["example_eng"+str(i)] = tail_str[last+1: ch_inds[i+1][0][0]]
-                    last = ch_inds[i+1][0][1]
-                    i+=1
-                card["example_ch"+str(i)] = ch_inds[i][1]
-                # one past last Chinese Char to account for = sign
-                card["example_eng"+str(i)] = tail_str[last+1: -1]
-                # slice off anything in tail parenthesis
-                eng_str=eng_str[:start-1]
     card['english'] = eng_str
     card_list.append(card)
 print(card_list)
