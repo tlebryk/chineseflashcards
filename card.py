@@ -10,10 +10,9 @@ class Card:
            setattr(self, field[0], kwargs.get(field))  
         self.edit_flag = False
 
-    def edit(self):
-        self.edit_flag = True
-
-    
+    def __setattr__(self, name, value):
+        self.__dict__['edit_flag'] = True
+        self.__dict__[name] = value
 
     def __str__(self): 
         return "\n".join([att + ": " + 

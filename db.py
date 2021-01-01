@@ -25,3 +25,25 @@ def close(conn):
     conn.close()
 max_cards = 100
 
+def init_db():
+    sql_text = '''CREATE TABLE vocabulary
+    (id INTEGER PRIMARY KEY AUTOINCREMENT,
+    chars TEXT,
+    pinyin TEXT,
+    english TEXT,
+    example_ch0 TEXT,
+    example_eng0 TEXT,
+    example_ch1 TEXT,
+    example_eng1 TEXT,
+    example_ch2 TEXT,
+    example_eng2 TEXT,
+    interval SMALLINT,
+    ease TINYINT,
+    next DATE,
+    learning BOOLEAN,
+    audiopath STRING,
+    audioblob BLOB,
+    field1,
+    field2,
+    field3)'''
+    create_db('vocab.db', sql_text)

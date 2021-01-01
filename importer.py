@@ -43,12 +43,12 @@ for note in data['notes']:
         (chars, pinyin, english, 
         example_eng0, example_eng1, example_eng2,
         example_ch0, example_ch1, example_ch2, 
-        next, ease, learning) 
-        VALUES(?,?,?,?,?,?,?,?,?,?,?,?) ''', 
+        interval, next, ease, learning) 
+        VALUES(?,?,?,?,?,?,?,?,?,?,?,?, ?) ''', 
         [cd["chars"], cd["pinyin"], cd["english"],
         cd["example_eng0"], cd["example_eng1"], cd["example_eng2"],
         cd["example_ch0"], cd["example_ch1"], cd["example_ch2"],
-        today, 0, True])
+        0, today, 0, True])
 
 card.db.close(card.Card.conn)
     # card_list.append(cd)

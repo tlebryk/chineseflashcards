@@ -1,0 +1,5 @@
+id, chars, pinyin, english, example_ch0, example_eng0, example_ch1, example_eng1, example_ch2, example_eng2, interval, ease, next, learning, audiopath, audioblob, field1, field2, field3
+ 1, 变化, biànhuà , change , 你的老家有没有变化, has your hometown changed/ is there changes,  ,  ,  ,  , 0, 0, 2021-01-01 09:38:19.258022, 1, None, None, None, None, None,
+ 2, 完全, wánquán , complete, whole, totally, entirely , 首都变得完全不一样的, The capital changed to be completely different. ,  ,  ,  ,  , 0, 0, 2021-01-01 09:38:19.258022, 1, None, None, None, None, None,
+ 3, 特点, tèdiǎn , characteristic , 每个地方有自己的特点, Every place has it's own characteristics,  ,  ,  ,  , 0, 0, 2021-01-01 09:38:19.258022, 1, None, None, None, None, None,
+ 4, 印象, yìnxiàng , impression, 西海岸给你留下了什么印象, the west coast left you what impression?,  ,  ,  ,  , 0, 0, 2021-01-01 09:38:19.258022, 1, None, None, None, None, None,
