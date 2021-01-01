@@ -1,0 +1,10 @@
+.vs
+.vscode
+.ropeproject
+__pycache__
+anki_decks
+scrap.py
+helper.py 
+oop.py 
+test.py 
+vocab.db
