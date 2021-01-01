@@ -8,10 +8,10 @@ class Card:
     def __init__(self, **kwargs): 
         for field in self.fields:
            setattr(self, field[0], kwargs.get(field))  
-           setattr(self, edit_flag, False)
+        self.edit_flag = False
 
     def edit(self):
-        edit_flag = True
+        self.edit_flag = True
 
     
 
