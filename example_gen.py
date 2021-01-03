@@ -54,3 +54,4 @@ def gen_ex(eng_str):
     card['english'] = eng_str
 
     return card
+

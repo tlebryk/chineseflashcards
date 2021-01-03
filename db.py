@@ -17,7 +17,6 @@ def create_db(dbname, sql_text):
     conn = connect(dbname)
     # delete table for testing purposes
     conn.execute('''DROP TABLE IF EXISTS vocabulary''')
-
     conn.execute(sql_text)
 
 def close(conn):
@@ -25,9 +24,9 @@ def close(conn):
     conn.close()
 max_cards = 100
 
+# TODO: set default date?
 def init_db():
-    sql_text = '''CREATE TABLE vocabulary
-    (id INTEGER PRIMARY KEY AUTOINCREMENT,
+    sql_text = '''CREATE TABLE IF NOT EXISTS vocabulary (id INTEGER PRIMARY KEY AUTOINCREMENT,
     chars TEXT,
     pinyin TEXT,
     english TEXT,
@@ -37,13 +36,22 @@ def init_db():
     example_eng1 TEXT,
     example_ch2 TEXT,
     example_eng2 TEXT,
+    alpha FLOAT DEFAULT 3.0,
+    beta FLOAT DEFAULT 3.0, 
+    t SMALLINT DEFAULT 1,
+    last DATE,
     interval SMALLINT,
     ease TINYINT,
     next DATE,
-    learning BOOLEAN,
+    learning BOOLEAN DEFAULT false,
     audiopath STRING,
     audioblob BLOB,
     field1,
     field2,
-    field3)'''
+    field3);'''
     create_db('vocab.db', sql_text)
+
+command = '''CREATE TABLE IF NOT EXISTS vocabulary2 (id INTEGER PRIMARY KEY AUTOINCREMENT,
+    chars TEXT);'''
+conn = connect('vocab.db')
+conn.execute(command)

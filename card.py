@@ -7,7 +7,7 @@ class Card:
 
     def __init__(self, **kwargs): 
         for field in self.fields:
-           setattr(self, field[0], kwargs.get(field))  
+           setattr(self, field[0], kwargs.get(field[0]))  
         self.edit_flag = False
 
     def __setattr__(self, name, value):
