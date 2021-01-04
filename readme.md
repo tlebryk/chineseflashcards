@@ -1,0 +1,1 @@
+A Chinese Flashcard app for spaced repetition using Ebisu's algorithm. 
