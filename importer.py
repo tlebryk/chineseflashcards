@@ -4,6 +4,7 @@ import os
 import re 
 import example_gen
 from datetime import date
+from datetime import timedelta
 import spaced_rep
 
 '''json_import takes a json of anki exported deck of Hanzi cards, saves it into the vocabulary database,
@@ -29,8 +30,6 @@ Sample format:
     }
 '''
 
-
-
 def json_import(path, parser = True):
     today = date.today()
     with open(path, 'r', encoding='utf-8') as outfile: 
@@ -46,8 +45,7 @@ def json_import(path, parser = True):
         "example_ch2" : " ",
         "example_eng0" : " ",
         "example_eng1" : " ",
-        "example_eng2" : " ",
-        }
+        "example_eng2" : " ",}
         cd["chars"] = note["fields"][0]
         # skip note["fields"][1], color, which is empty
         cd["pinyin"] = re.sub(r"[\<].*?[>]", "", note["fields"][2])
@@ -60,30 +58,24 @@ def json_import(path, parser = True):
             cd.update(example_gen.gen_ex(eng_str))
         else: 
             cd['english'] = eng_str
-        cd['alpha']=spaced_rep.a_init
-        cd['beta']=spaced_rep.b_init
-        cd['t']=spaced_rep.t_init
+
 
         card.Card.conn.execute(
             '''INSERT INTO vocabulary 
             (chars, pinyin, english, 
             example_eng0, example_eng1, example_eng2,
             example_ch0, example_ch1, example_ch2, 
-            last, next, ease, learning,
-            alpha, beta, t
-            ) 
+            last, next, ease, learning) 
             VALUES(?,?,?,?,?,?,?,?,?,NULL,?,?, ?, ?,?,?) ''', 
             [cd["chars"], cd["pinyin"], cd["english"],
             cd["example_eng0"], cd["example_eng1"], cd["example_eng2"],
             cd["example_ch0"], cd["example_ch1"], cd["example_ch2"],
-            today, 0, False, 
-            cd['alpha'], cd['beta'], cd['t']
-            ])
+            today - timedelta(days=1), 0, False, 
+            cd['alpha'], cd['beta'], cd['t']])
 
         card_count+=1
     card.db.close(card.Card.conn)
     return card_count
-
 
 # Filepath for convenience: 
 sample_path= "anki_decks\\new\\deck.json"
